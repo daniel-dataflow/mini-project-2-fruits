@@ -55,7 +55,7 @@ mini-project-2-fruits/
 ### 클래스 구성
 - **사과 (Apple Fuji)**: 특상, 상, 중 - 상품 등급
 - **배 (Pear Chuhwang)**: 특상, 상, 중 - 상품 등급
-- **사과 (persimmon booyu)**: 특상, 상, 중 - 상품 등급
+- **감 (persimmon booyu)**: 특상, 상, 중 - 상품 등급
 - **총 클래스**: 약 9개
 
 ### 데이터 분할
