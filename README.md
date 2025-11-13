@@ -505,6 +505,21 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
 
 ---
 
+## 📄 추가 문서 자료
+
+프로젝트의 분석 설계, 분석 결과 등은 [`document/`](./document/) 폴더에 정리되어 있습니다.
+
+- 주요 문서:
+    - [일일 보고서](./document/01_DailyReport.xlsx)
+    - [분석 계획 보고서](./document/02_AnalysisPlanReport.docx)
+    - [코딩 컨벤션](./document/03_CodingConvention.docx)
+    - [데이터 명세서](./document/04_DataStatement.docx)
+    - [분석 결과 보고서](./document/05_AnalysisResultsReport.docx)
+    - [발표자료](./document/presentation.pptx)
+
+
+---
+
 ## 📚 참고 자료
 
 - **YOLOv5**: https://github.com/ultralytics/yolov5
