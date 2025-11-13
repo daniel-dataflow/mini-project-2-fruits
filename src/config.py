@@ -1,13 +1,20 @@
 from pathlib import Path
 
 # Paths
-BASE_DIR = Path.cwd().parent
+BASE_DIR = Path.cwd()
 IMG_DIR = BASE_DIR / "data/raw/images"
 JSON_DIR = BASE_DIR / "data/raw/json_labels"
 DATASET_YOLO = BASE_DIR / "processed/preprocessed_data/yolov5"
 DATASET_EFFDET = BASE_DIR / "processed/preprocessed_data/efficientdet"
 RESULT_DIR = BASE_DIR / "processed/results_comparison"
 YOLO_WEIGHTS_FILE = RESULT_DIR / "yolov5su.pt"
+
+print(f" BASE_DIR: {BASE_DIR}")
+print(f" IMG_DIR: {IMG_DIR}")
+print(f" JSON_DIR: {JSON_DIR}")
+print(f" DATASET_YOLO: {DATASET_YOLO}")
+print(f" DATASET_EFFDET: {DATASET_EFFDET}")
+print(f" RESULT_DIR: {RESULT_DIR}")
 
 # Training Parameters
 TRAIN_CONFIG = {

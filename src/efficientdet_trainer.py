@@ -1,11 +1,13 @@
 from common_imports import *
+from config import *
+from dataset import EffDetDataset, collate_fn
 
 
 def train_efficientdet(splits, classes, epochs=None):
     if epochs is None:
         epochs = TRAIN_CONFIG['epochs']
 
-    print("\\n EfficientDet 학습 시작")
+    print("\n✓ EfficientDet 학습 시작")
 
     device = torch.device('cuda' if torch.cuda.is_available() and MODEL_CONFIG['device'] == 'cuda' else 'cpu')
     num_classes = len(classes)
@@ -87,7 +89,7 @@ def train_efficientdet(splits, classes, epochs=None):
                 'model_state_dict': model.model.state_dict(),
                 'config': config
             }, RESULT_DIR / 'efficientdet_best.pth')
-            print(f"Saved (Loss: {best_loss:.4f})")
+            print(f"✓ Saved (Loss: {best_loss:.4f})")
         else:
             patience_counter += 1
             if patience_counter >= TRAIN_CONFIG['patience']:
@@ -96,7 +98,7 @@ def train_efficientdet(splits, classes, epochs=None):
 
         scheduler.step()
 
-    print(f"EfficientDet 학습 완료 (Best Loss: {best_loss:.4f})")
+    print(f"✓ EfficientDet 학습 완료 (Best Loss: {best_loss:.4f})")
 
     # Loss curve 저장
     plt.figure(figsize=(8, 5))
@@ -110,7 +112,7 @@ def train_efficientdet(splits, classes, epochs=None):
     plt.tight_layout()
     plt.savefig(RESULT_DIR / "efficientdet_loss_curve.png")
     plt.close()
-    print(f"Loss curve 저장: {RESULT_DIR / 'efficientdet_loss_curve.png'}")
+    print(f"✓ Loss curve 저장: {RESULT_DIR / 'efficientdet_loss_curve.png'}")
 
     return config
 
@@ -120,7 +122,7 @@ def evaluate_efficientdet_coco(config, splits, classes):
         print("✗ pycocotools 없음 - Simple 평가로 대체")
         return evaluate_efficientdet_simple(config, splits, classes)
 
-    print("\\n EfficientDet COCO 평가 시작")
+    print("\n✓ EfficientDet COCO 평가 시작")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -227,7 +229,7 @@ def evaluate_efficientdet_coco(config, splits, classes):
 
 
 def evaluate_efficientdet_simple(config, splits, classes):
-    print("\\n EfficientDet Simple 평가 중...")
+    print("\n✓ EfficientDet Simple 평가 중...")
     # 간단한 평가 로직 구현
     return {
         'mAP50': 0.0,

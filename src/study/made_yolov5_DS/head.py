@@ -81,7 +81,7 @@ class Detect(nn.Module):
         return outputs
 
 # --- End of Head Implementation ---
-
+"""
 
 # --- ---------------------- ---
 # ---     예제 사용법 (Test)     ---
@@ -155,3 +155,4 @@ print(f"P4 출력 형상: {predictions[1].shape}")
 print(f"P5 출력 형상: {predictions[2].shape}")
 
 print("\n이 'predictions' 텐서가 학습 시 손실 함수(Loss Function)로 전달됩니다.")
+"""

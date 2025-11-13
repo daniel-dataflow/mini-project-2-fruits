@@ -63,3 +63,4 @@ __all__ = [
     'COCO', 'COCOeval',
     # Flags
     'YOLO_AVAILABLE', 'EFFDET_AVAILABLE', 'COCO_AVAILABLE'
+]
