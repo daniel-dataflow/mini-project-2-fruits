@@ -542,4 +542,4 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
 
 **작성일**: 2025년 11월 12일  
 **마지막 수정**: 2025년 11월 13일  
-**작성자**: [Your Name]
+**작성자**: 한대성
