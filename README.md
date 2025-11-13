@@ -557,3 +557,5 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
 **작성일**: 2025년 11월 12일  
 **마지막 수정**: 2025년 11월 13일  
 **작성자**: 한대성
+
+![image](https://github.com/user-attachments/assets/a5ce47b5-7171-4695-800a-c411db03fcf5)
