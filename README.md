@@ -31,7 +31,8 @@ mini-project-2-fruits/
 │   └── test_data/                    # 별도 테스트 데이터셋
 │       ├── images/
 │       └── json_labels/
-├── processed/
+├── document/                         # 프로젝트 자료
+├── processed/                        # 로컬 전용(.gitignore 등록됨)
 │   ├── preprocessed_data/
 │   │   ├── yolov5/                   # YOLOv5 포맷 변환 데이터
 │   │   │   ├── images/
@@ -40,12 +41,20 @@ mini-project-2-fruits/
 │   │   └── efficientdet/             # EfficientDet 포맷 데이터
 │   │       └── coco_*.json
 │   └── results_comparison/           # 학습 결과 및 평가 지표
-│       ├── yolov5su.pt              # YOLOv5 사전학습 모델
-│       ├── efficientdet_best.pth    # EfficientDet 최고 성능 체크포인트
-│       └── *.json, *.png            # 메트릭 및 시각화
+│       ├── yolov5su.pt               # YOLOv5 사전학습 모델
+│       ├── efficientdet_best.pth     # EfficientDet 최고 성능 체크포인트
+│       └── *.json, *.png             # 메트릭 및 시각화
 └── src/
-    ├── yolov5_efficientdet_comb.ipynb  # 📌 이 프로젝트의 메인 파일
-    └── 기타 노트북 파일
+    ├── study/                        # 학습용 기타 파일들
+    ├── config.py                     # 설정 및 경로
+    ├── utils.py                      # 유틸리티 함수
+    ├── data_preprocessing.py         # 데이터 전처리
+    ├── dataset.py                    # 데이터셋 클래스
+    ├── yolo_trainer.py               # YOLO 학습/평가
+    ├── efficientdet_trainer.py       # EfficientDet 학습/평가
+    ├── visualization.py              # 시각화
+    ├── main.py                       # 메인 실행 파일 (Python)
+    └── yolov5_efficientdet_comb.ipynb  # 메인 실행 파일 (Jupyter)
 ```
 
 ---
@@ -75,54 +84,134 @@ mini-project-2-fruits/
 ### 필수 라이브러리 설치
 
 ```bash
-# YOLOv5
-pip install ultralytics
-
-# EfficientDet
-pip install timm effdet
-
-# 기타 의존성
+# 핵심 딥러닝 프레임워크
 pip install torch torchvision
-pip install opencv-python
+
+# 객체 탐지 모델
+pip install ultralytics      # YOLOv5
+pip install effdet timm       # EfficientDet
+
+# 데이터 처리 및 평가
 pip install pycocotools
+pip install opencv-python
 pip install scikit-learn
+
+# 시각화
 pip install matplotlib seaborn
-pip install numpy pandas
-pip install tqdm
+
+# 기타 유틸리티
+pip install numpy pandas tqdm pyyaml
 ```
 
-### 실행 방법
+---
 
-1. **노트북 열기**
-   ```bash
-   jupyter notebook src/yolov5_efficientdet_comb.ipynb
-   ```
+## 💻 실행 방법
 
-2. **전체 파이프라인 실행**
-   ```python
-   # 마지막 셀에서 main() 함수 실행
-   if __name__ == "__main__":
-       main()
-   ```
+### 방법 1️⃣: Python 스크립트 실행 (권장)
 
-3. **단계별 실행 (선택사항)**
-   - 셀 1-3: 라이브러리 임포트 및 경로 설정
-   - 셀 4-5: 데이터 전처리
-   - 셀 6-7: YOLOv5 학습 및 평가
-   - 셀 8-11: EfficientDet 학습 및 평가
-   - 셀 12-13: 성능 비교 시각화
+모듈화된 Python 파일을 사용하여 전체 파이프라인을 실행합니다.
+
+#### 1-1. 전체 파이프라인 자동 실행
+```bash
+cd src
+python main.py
+```
+
+이 명령은 다음 작업을 자동으로 수행합니다:
+1. 데이터 전처리 및 분할
+2. YOLOv5 학습 및 평가
+3. EfficientDet 학습 및 평가
+4. 성능 비교 시각화
+
+#### 1-2. 개별 모듈 실행
+
+특정 단계만 실행하고 싶을 때:
+
+```bash
+# 1. 데이터 전처리만 실행
+python data_preprocessing.py
+
+# 2. YOLOv5만 학습/평가
+python yolo_trainer.py
+
+# 3. EfficientDet만 학습/평가
+python efficientdet_trainer.py
+
+# 4. 시각화만 실행
+python visualization.py
+```
+
+#### 1-3. 설정 변경
+
+`config.py` 파일에서 하이퍼파라미터 조정:
+
+```python
+TRAIN_CONFIG = {
+    'epochs': 100,              # 학습 에포크
+    'yolo_batch_size': 16,      # YOLO 배치 크기
+    'effdet_batch_size': 4,     # EfficientDet 배치 크기
+    'patience': 30,             # Early stopping patience
+    'learning_rate': 0.001,
+    'image_size_yolo': 640,
+    'image_size_effdet': 512,
+}
+```
+
+#### 1-4. 코드에서 직접 호출
+
+```python
+from yolo_trainer import train_yolo, evaluate_yolo
+from efficientdet_trainer import train_efficientdet, evaluate_efficientdet
+
+# YOLOv5만 재학습
+model = train_yolo(epochs=50)
+metrics = evaluate_yolo(model)
+
+# EfficientDet만 재학습
+effdet_model = train_efficientdet(epochs=50)
+effdet_metrics = evaluate_efficientdet(effdet_model)
+```
+
+### 방법 2️⃣: Jupyter Notebook 실행 (대화형)
+
+단계별로 결과를 확인하며 실행하고 싶을 때 사용합니다.
+
+#### 2-1. 노트북 열기
+```bash
+cd src
+jupyter notebook yolov5_efficientdet_comb.ipynb
+```
+
+#### 2-2. 실행 방식
+
+**전체 실행:**
+```python
+# 노트북 마지막 셀에서
+if __name__ == "__main__":
+    main()
+```
+
+**단계별 실행:**
+- **셀 1-3**: 라이브러리 임포트 및 경로 설정
+- **셀 4-5**: 데이터 전처리
+- **셀 6-7**: YOLOv5 학습 및 평가
+- **셀 8-11**: EfficientDet 학습 및 평가
+- **셀 12-13**: 성능 비교 시각화
+
+각 셀을 개별적으로 실행하여 중간 결과를 확인할 수 있습니다.
 
 ---
 
 ## 🔧 주요 기능
 
-### 1. 데이터 전처리 (`preprocess_data()`)
-- JSON 레이블 파일 파싱
+### 1. 데이터 전처리
+- JSON 레이블 파일 자동 파싱
 - 이미지-레이블 매칭
-- Train/Val/Test 분할 (8:1:1)
+- Train/Val/Test 자동 분할 (8:1:1)
 - 바운딩박스 정규화
+- 멀티 포맷 지원: YOLO 및 COCO 형식 자동 변환
 
-### 2. YOLOv5 모델 (`train_yolo()`, `test_yolo()`)
+### 2. YOLOv5 모델
 - **입력**: YOLO 형식 데이터셋 (정규화된 바운딩박스)
 - **학습 설정**:
   - 배치 크기: 16
@@ -131,7 +220,7 @@ pip install tqdm
   - Early Stopping: patience=30
 - **평가 지표**: mAP@0.5, mAP@0.5:0.95, Precision, Recall
 
-### 3. EfficientDet 모델 (`train_efficientdet()`, `test_efficientdet()`)
+### 3. EfficientDet 모델
 - **아키텍처**: EfficientDet-D0 (사전학습 백본)
 - **입력**: COCO 형식 어노테이션 + 이미지
 - **학습 설정**:
@@ -146,25 +235,33 @@ pip install tqdm
   - 단순 IoU 기반 평가 (COCO 없을 시)
   - 혼동 행렬 분석
 
-### 4. 평가 및 시각화
-- **혼동 행렬**: 정규화된 형식 + 개수 형식
-- **클래스별 정확도**: 막대 차트
-- **성능 비교 그래프**: YOLOv5 vs EfficientDet
-- **Classification Report**: 정밀도, 재현율, F1-score
+### 4. 실시간 모니터링
+- 학습 진행 상황 실시간 표시
+- 손실 곡선 자동 생성
+- 다양한 지표로 자동 평가
+
+### 5. 자동 시각화
+- 혼동 행렬 (정규화 + 개수)
+- 클래스별 정확도 막대 차트
+- 성능 비교 그래프
+- Classification Report
 
 ---
 
-## 📈 출력 결과
+## 📈 결과 확인
 
-### 생성되는 파일
+### 생성되는 파일 위치
+결과는 `processed/results_comparison/` 폴더에 저장됩니다.
 
 ```
 processed/results_comparison/
+├── final_results.json                   # 📊 최종 성능 비교 결과
+│
 ├── yolo_metrics.json                    # YOLOv5 성능 지표
 ├── efficientdet_metrics.json            # EfficientDet 성능 지표
 ├── final_test_results.json              # 최종 종합 결과
 │
-├── performance_comparison_test.png      # 성능 비교 그래프
+├── performance_comparison_test.png      # 📈 성능 비교 그래프
 ├── final_comparison_graph.png           # 최종 비교 그래프
 ├── test_summary_graph.png               # 요약 그래프
 │
@@ -184,13 +281,13 @@ processed/results_comparison/
 ```json
 {
   "summary": {
-    "mAP50": 0.85,           # 50% IoU 기준 평균 정확도
-    "mAP50_95": 0.65,        # 50-95% IoU 범위 평균 정확도
-    "precision": 0.88,       # 정밀도
-    "recall": 0.82           # 재현율
+    "mAP50": 0.85,           // 50% IoU 기준 평균 정확도
+    "mAP50_95": 0.65,        // 50-95% IoU 범위 평균 정확도
+    "precision": 0.88,       // 정밀도
+    "recall": 0.82           // 재현율
   },
-  "overall_accuracy": 0.90,  # 전체 정확도 (EfficientDet)
-  "class_accuracies": {      # 클래스별 정확도
+  "overall_accuracy": 0.90,  // 전체 정확도 (EfficientDet)
+  "class_accuracies": {      // 클래스별 정확도
     "apple_fuji_L": 0.92,
     "apple_fuji_M": 0.89,
     ...
@@ -205,51 +302,68 @@ processed/results_comparison/
 ```
 1. 데이터 로드 (JSON + 이미지)
     ↓
-2. Train/Val/Test 분할
+2. Train/Val/Test 분할 (8:1:1)
     ↓
-3. 데이터 형식 변환 (YOLO, COCO)
+3. 데이터 형식 변환
+   ├─→ YOLO 형식 (.txt)
+   └─→ COCO 형식 (.json)
     ↓
-┌─→ YOLOv5 학습 ──→ YOLOv5 테스트
-│                     ↓
-├→ EfficientDet 학습 → EfficientDet 테스트 (+ 혼동 행렬)
-│                     ↓
-└─── 성능 비교 시각화 ──→ 최종 결과 저장
+┌─→ YOLOv5 학습 (100 epochs) ──→ YOLOv5 테스트
+│                                    ↓
+│                              mAP, Precision, Recall
+│
+├→ EfficientDet 학습 (100 epochs) → EfficientDet 테스트
+│                                    ↓
+│                              혼동 행렬, 클래스별 정확도
+│
+└─── 성능 비교 시각화 ──→ 최종 결과 저장 (JSON + PNG)
 ```
 
 ---
 
-## ⚙️ 주요 파라미터 조정
+## ⚙️ 커스터마이징
 
-### YOLOv5 학습 설정
+### Python 방식
+각 모듈은 독립적으로 실행 가능하므로 필요한 부분만 수정하여 사용할 수 있습니다.
+
 ```python
-train_yolo(
-    data_yaml=DATASET_YOLO / 'data.yaml',
-    epochs=100  # ← 변경 가능
+# config.py에서 설정 변경
+TRAIN_CONFIG['epochs'] = 50
+TRAIN_CONFIG['yolo_batch_size'] = 8
+
+# 또는 함수 호출 시 직접 지정
+from yolo_trainer import train_yolo
+
+model = train_yolo(
+    data_yaml='path/to/data.yaml',
+    epochs=50,
+    batch_size=8,
+    img_size=640
 )
 ```
 
-### EfficientDet 학습 설정
+### Jupyter Notebook 방식
+노트북에서 셀 단위로 파라미터를 수정하여 실행:
+
 ```python
-train_efficientdet(
-    splits=splits,
-    classes=classes,
-    epochs=100  # ← 변경 가능
-)
+# YOLOv5 학습 설정
+epochs = 50  # ← 변경
+batch_size = 8
+
+# EfficientDet 학습 설정
+effdet_epochs = 100
+effdet_batch_size = 4
 ```
 
 ### 이미지 크기 설정
-- **YOLOv5**: 640×640 (권장값, `train_yolo()`에서 수정 가능)
-- **EfficientDet**: 512×512 (고정값, `EffDetDataset` 클래스에서 수정)
+- **YOLOv5**: 640×640 (권장값, config.py에서 수정 가능)
+- **EfficientDet**: 512×512 (dataset.py의 EffDetDataset에서 수정)
 
-### 바운딩박스 신뢰도 임계값
+### 신뢰도 임계값
 ```python
-confidence_threshold = 0.3  # evaluate_efficientdet_with_confusion_matrix() 함수 내
-```
-
-### IoU 임계값
-```python
-if iou >= 0.5:  # 이 값을 변경하여 엄격함 조정
-    best_pred_label = pred_label
+# efficientdet_trainer.py 내부
+confidence_threshold = 0.3  # 탐지 신뢰도 기준
+iou_threshold = 0.5         # IoU 매칭 기준
 ```
 
 ---
@@ -260,30 +374,70 @@ if iou >= 0.5:  # 이 값을 변경하여 엄격함 조정
 ```
 ⚠️ Warning: pycocotools 없음
 ```
-**해결책**: `pip install pycocotools` 설치
+**해결책**: 
+```bash
+pip install pycocotools
+```
 - 설치 실패 시 COCO 평가는 건너뛰고 단순 IoU 기반 평가로 진행됩니다.
 
 ### 2. CUDA 메모리 부족
+**증상**: `RuntimeError: CUDA out of memory`
+
+**해결책**: config.py에서 배치 크기 감소
 ```python
-# 배치 크기 감소
-# train_yolo(): batch=8 (기본값 16)
-# EfficientDet DataLoader: batch_size=2 (기본값 4)
+TRAIN_CONFIG = {
+    'yolo_batch_size': 8,      # 기본값 16 → 8
+    'effdet_batch_size': 2,    # 기본값 4 → 2
+}
 ```
 
 ### 3. 이미지 파일을 찾을 수 없음
-- JSON 파일의 `stem`과 실제 이미지 파일명이 일치하는지 확인
+**원인**: JSON 파일의 `stem`과 실제 이미지 파일명 불일치
+
+**확인 사항**:
+- JSON 레이블의 파일명과 이미지 파일명이 일치하는지
 - 지원되는 형식: `.jpg`, `.png`, `.jpeg` (대소문자 구분 없음)
 
 ### 4. 한글 폰트 설정 실패
-- Windows: `C:/Windows/Fonts/malgun.ttf` 존재 확인
-- Mac: `AppleGothic` 자동 사용
-- Linux: 별도 폰트 설정 필요
+**해결책**:
+- **Windows**: `C:/Windows/Fonts/malgun.ttf` 존재 확인
+- **Mac**: `AppleGothic` 자동 사용
+- **Linux**: 
+  ```bash
+  sudo apt-get install fonts-nanum
+  ```
+
+### 5. 모듈을 찾을 수 없음 (ModuleNotFoundError)
+**원인**: Python 경로 문제
+
+**해결책**:
+```bash
+# src 폴더에서 실행
+cd src
+python main.py
+
+# 또는 PYTHONPATH 설정
+export PYTHONPATH="${PYTHONPATH}:$(pwd)/src"
+```
 
 ---
 
-## 📝 코드 구조 설명
+## 📝 코드 구조 설명 (Python 버전)
 
-### 주요 클래스 및 함수
+### 주요 파일 및 역할
+
+| 파일명 | 역할 | 주요 함수 |
+|--------|------|-----------|
+| `config.py` | 설정 및 경로 관리 | 경로 상수, 하이퍼파라미터 |
+| `utils.py` | 공통 유틸리티 | 파일 처리, 로깅 |
+| `data_preprocessing.py` | 데이터 전처리 | `preprocess_data()` |
+| `dataset.py` | 데이터셋 클래스 | `EffDetDataset` |
+| `yolo_trainer.py` | YOLO 학습/평가 | `train_yolo()`, `test_yolo()` |
+| `efficientdet_trainer.py` | EfficientDet 학습/평가 | `train_efficientdet()`, `test_efficientdet()` |
+| `visualization.py` | 시각화 | `visualize_comparison()` |
+| `main.py` | 메인 실행 | `main()` |
+
+### 주요 함수
 
 | 함수명 | 목적 | 입력 | 출력 |
 |--------|------|------|------|
@@ -297,9 +451,11 @@ if iou >= 0.5:  # 이 값을 변경하여 엄격함 조정
 | `evaluate_efficientdet_with_confusion_matrix()` | 혼동 행렬 분석 | config, `splits`, `classes`, device | 혼동 행렬, 클래스별 정확도 |
 | `visualize_comparison()` | 성능 비교 시각화 | 두 모델의 지표 | PNG 그래프 |
 
-### 데이터 형식
+---
 
-#### JSON 레이블 형식
+## 📚 데이터 형식
+
+### JSON 레이블 형식
 ```json
 {
   "cate1": "apple",           // 과일 종류
@@ -313,18 +469,37 @@ if iou >= 0.5:  # 이 값을 변경하여 엄격함 조정
 }
 ```
 
-#### YOLO 레이블 형식 (.txt)
+### YOLO 레이블 형식 (.txt)
 ```
 <class_id> <x_center_norm> <y_center_norm> <width_norm> <height_norm>
 0 0.5 0.5 0.3 0.3
 ```
 
-#### COCO 어노테이션 형식
+### COCO 어노테이션 형식
 ```json
 {
-  "images": [{"id": 0, "file_name": "...", "width": 640, "height": 480}],
-  "annotations": [{"id": 0, "image_id": 0, "category_id": 0, "bbox": [x, y, w, h]}],
-  "categories": [{"id": 0, "name": "apple_fuji_L"}]
+  "images": [
+    {
+      "id": 0,
+      "file_name": "image_001.jpg",
+      "width": 640,
+      "height": 480
+    }
+  ],
+  "annotations": [
+    {
+      "id": 0,
+      "image_id": 0,
+      "category_id": 0,
+      "bbox": [100, 150, 200, 200]  // [x, y, width, height]
+    }
+  ],
+  "categories": [
+    {
+      "id": 0,
+      "name": "apple_fuji_L"
+    }
+  ]
 }
 ```
 
@@ -335,6 +510,7 @@ if iou >= 0.5:  # 이 값을 변경하여 엄격함 조정
 - **YOLOv5**: https://github.com/ultralytics/yolov5
 - **EfficientDet**: https://github.com/rwightman/efficientdet-pytorch
 - **COCO 평가**: https://github.com/cocodataset/cocoapi
+- **Ultralytics 문서**: https://docs.ultralytics.com/
 
 ---
 
@@ -346,19 +522,24 @@ if iou >= 0.5:  # 이 값을 변경하여 엄격함 조정
 3. **COCO 평가** - `pycocotools` 미설치 시 대체 평가 방식 사용
 
 ### 향후 개선 방향
-- [ ] Multi-box detection 지원
+- [ ] Multi-box detection 지원 (한 이미지 내 여러 객체 동시 탐지)
 - [ ] 앙상블 모델 추가 (YOLOv5 + EfficientDet)
-- [ ] 실시간 추론 최적화
-- [ ] 모바일 환경 배포 (ONNX, TensorFlow Lite)
+- [ ] 실시간 추론 최적화 (TensorRT, ONNX)
+- [ ] 모바일 환경 배포 (TensorFlow Lite, PyTorch Mobile)
+- [ ] 웹 기반 데모 인터페이스 (Gradio, Streamlit)
+
+### Python vs Jupyter Notebook
+- **Python**: 자동화된 배치 실행, 재현성, 프로덕션 환경에 적합
+- **Jupyter Notebook**: 탐색적 분석, 교육용, 단계별 디버깅에 적합
 
 ---
 
 ## 📄 라이선스
 
-[프로젝트의 라이선스 정보를 입력하세요]
+이 프로젝트는 교육 및 연구 목적으로 제작되었습니다.
 
 ---
 
 **작성일**: 2025년 11월 12일  
-**마지막 수정**: 2025년 11월 12일
-
+**마지막 수정**: 2025년 11월 13일  
+**작성자**: [Your Name]
